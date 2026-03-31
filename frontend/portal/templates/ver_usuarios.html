@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block sidebar_links %}
+    <a href="/admin-panel/">📁 Cargar Archivo</a>
+    <a href="/ver-usuarios/">👥 Ver Usuarios</a>
+{% endblock %}
+
+{% block content %}
+<h1>REVISIÓN DE USUARIOS</h1>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Rol</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.id }}</td>
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.rol }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align:center">
+                    No hay usuarios cargados
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

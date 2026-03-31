@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<horarios>
+    <curso codigo="770">
+        Mi horario de curso es HorarioI: 09:40 HorarioF: 10:30
+    </curso>
+    <curso codigo="771">
+        Elijo este horario HorarioI: 08:00 HorarioF: 08:50
+    </curso>
+</horarios>

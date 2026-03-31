@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block sidebar_links %}
+    <a href="/horarios/">📅 Horarios</a>
+    <a href="/notas/">📝 Ingresar Notas</a>
+    <a href="/reporte-notas/">📊 Reporte Notas</a>
+{% endblock %}
+
+{% block content %}
+<h1>Bienvenido, {{ request.session.nombre }}</h1>
+<div class="card">
+    <p>Selecciona una opción del menú para continuar.</p>
+</div>
+{% endblock %}

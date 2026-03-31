@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block sidebar_links %}
+    <a href="/admin-panel/">📁 Cargar Archivo</a>
+    <a href="/ver-usuarios/">👥 Ver Usuarios</a>
+{% endblock %}
+
+{% block content %}
+<h1>CARGA DE ARCHIVOS</h1>
+
+<div class="card">
+    <form method="POST">
+        {% csrf_token %}
+        <button type="button" class="btn btn-primary"
+            onclick="document.getElementById('fileInput').click()">
+            📂 Cargar Archivo
+        </button>
+        <button type="submit" class="btn btn-success">⚙️ Procesar Datos</button>
+        <button type="button" class="btn btn-danger"
+            onclick="document.getElementById('xmlInput').value=''">
+            🗑️ Limpiar Datos
+        </button>
+        <input type="file" id="fileInput" accept=".xml" style="display:none"
+            onchange="cargarArchivo(this)">
+        <br><br>
+        <label>Entrada:</label>
+        <textarea id="xmlInput" name="xml_content" rows="10"
+            placeholder="<?xml version='1.0'?>"></textarea>
+    </form>
+</div>
+
+{% if salida %}
+<div class="card">
+    <label>SALIDA:</label>
+    <textarea rows="10" readonly>{{ salida }}</textarea>
+</div>
+{% endif %}
+
+<script>
+function cargarArchivo(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('xmlInput').value = e.target.result;
+        };
+        reader.readAsText(file);
+    }
+}
+</script>
+{% endblock %}
