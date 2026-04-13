@@ -7,32 +7,60 @@
 {% endblock %}
 
 {% block content %}
-<h1>INGRESO DE NOTAS</h1>
+<div class="page-header">
+    <h1>📝 Ingreso de Notas</h1>
+    <p>Carga las notas de tus estudiantes mediante un archivo XML</p>
+</div>
 
 {% if mensaje %}
-<div class="alert">{{ mensaje }}</div>
+<div class="alert alert-success">✅ {{ mensaje }}</div>
 {% endif %}
 
 <div class="card">
+    <h3>Cargar Archivo de Notas</h3>
     <form method="POST">
         {% csrf_token %}
-        <button type="button" class="btn btn-primary"
-            onclick="document.getElementById('fileInput').click()">
-            📂 Cargar Archivo de Notas
-        </button>
-        <button type="submit" class="btn btn-success">💾 Procesar Notas</button>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button type="button" class="btn btn-secondary"
+                onclick="document.getElementById('fileInput').click()">
+                📂 Seleccionar Archivo
+            </button>
+            <button type="submit" class="btn btn-primary">
+                💾 Procesar Notas
+            </button>
+            <button type="button" class="btn btn-danger"
+                onclick="document.getElementById('xmlInput').value=''">
+                🗑️ Limpiar
+            </button>
+        </div>
         <input type="file" id="fileInput" accept=".xml" style="display:none"
             onchange="cargarArchivo(this)">
+        <span id="nombreArchivo" style="color:#666; font-size:13px;"></span>
         <br><br>
-        <textarea id="xmlInput" name="xml_content" rows="10"
-            placeholder="<?xml version='1.0'?>"></textarea>
+        <textarea id="xmlInput" name="xml_content" rows="12"
+            placeholder="<?xml version='1.0'?>&#10;<datos>&#10;  <curso codigo='770'>Matematicas</curso>&#10;  <notas>&#10;    <actividad nombre='Tarea1' carnet='1234'>90</actividad>&#10;  </notas>&#10;</datos>"></textarea>
     </form>
+</div>
+
+<div class="card" style="background:#f8f9ff;">
+    <h3>ℹ️ Formato del archivo XML</h3>
+    <pre style="background:#1a237e; color:#90caf9; padding:15px; border-radius:8px; font-size:13px; overflow-x:auto;">
+&lt;?xml version="1.0"?&gt;
+&lt;datos&gt;
+  &lt;curso codigo="770"&gt;Matematicas&lt;/curso&gt;
+  &lt;notas&gt;
+    &lt;actividad nombre="Tarea1" carnet="1234"&gt;90&lt;/actividad&gt;
+    &lt;actividad nombre="Tarea1" carnet="5678"&gt;70&lt;/actividad&gt;
+    &lt;actividad nombre="Tarea2" carnet="1234"&gt;80&lt;/actividad&gt;
+  &lt;/notas&gt;
+&lt;/datos&gt;</pre>
 </div>
 
 <script>
 function cargarArchivo(input) {
     const file = input.files[0];
     if (file) {
+        document.getElementById('nombreArchivo').textContent = '📄 ' + file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('xmlInput').value = e.target.result;

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block sidebar_links %}
     <a href="/horarios/">📅 Horarios</a>
@@ -7,61 +7,294 @@
 {% endblock %}
 
 {% block content %}
-<h1>HORARIOS</h1>
 
-{% if mensaje %}
-<div class="alert">{{ mensaje }}</div>
-{% endif %}
+<div class="horarios-container">
+    <h1>HORARIOS</h1>
 
-<div class="card">
-    <form method="POST">
+    <!-- Barra superior con botones y nombre de archivo -->
+    <div class="upload-section">
+        <div class="upload-bar">
+            <label class="btn-cargar" for="archivo-xml">
+                📁 Cargar Archivo de Horarios
+            </label>
+            <input type="file" id="archivo-xml" accept=".xml" style="display: none;" 
+                   onchange="cargarArchivoXML(this)">
+
+            <button type="submit" form="form-horarios" class="btn-procesar">
+                💾 Procesar y Guardar Horarios
+            </button>
+        </div>
+
+        <!-- Nombre del archivo (como en la Imagen 2) -->
+        <div id="nombre-archivo" class="archivo-seleccionado">
+            Ningún archivo seleccionado
+        </div>
+    </div>
+
+    <form method="POST" id="form-horarios" enctype="multipart/form-data">
         {% csrf_token %}
-        <button type="button" class="btn btn-primary"
-            onclick="document.getElementById('fileInput').click()">
-            📂 Cargar Archivo de Horarios
-        </button>
-        <button type="submit" class="btn btn-success">💾 Guardar</button>
-        <input type="file" id="fileInput" accept=".xml" style="display:none"
-            onchange="cargarArchivo(this)">
-        <br><br>
-        <textarea id="xmlInput" name="xml_content" rows="8"
-            placeholder="<?xml version='1.0'?>"></textarea>
+
+        <!-- Área XML → ahora es colapsable (opcional) -->
+        <details class="xml-details">
+            <summary>📄 Ver / Editar contenido XML (opcional)</summary>
+            <textarea id="xml-content" name="xml_content" class="xml-area" 
+                      placeholder="El contenido del XML aparecerá aquí después de cargar el archivo..."></textarea>
+        </details>
     </form>
-</div>
 
-{% if horarios.horarios %}
-<div class="card">
-    <table>
-        <thead>
-            <tr>
-                <th>Curso</th>
-                <th>Hora Inicio</th>
-                <th>Hora Fin</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for codigo, horario in horarios.horarios.items %}
-            <tr>
-                <td>{{ codigo }}</td>
-                <td>{{ horario.inicio }}</td>
-                <td>{{ horario.fin }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endif %}
+   {% if mensaje %}
+        <div class="msj-ok">{{ mensaje }}</div>
+    {% endif %}
 
+    <!-- Tabla semanal -->
+    <div class="tabla-contenedor">
+        {% if horarios and horarios|length > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Curso</th>
+                        <th>LUNES</th>
+                        <th>MARTES</th>
+                        <th>MIÉRCOLES</th>
+                        <th>JUEVES</th>
+                        <th>VIERNES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for curso, dias in horarios.items %}
+                    <tr>
+                        <td class="curso-nombre"><strong>{{ curso }}</strong></td>
+                        <td>
+                            {% if dias.lunes %}
+                                <span class="horario-pill">{{ dias.lunes }}</span>
+                            {% else %}
+                                <span class="vacio">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if dias.martes %}
+                                <span class="horario-pill">{{ dias.martes }}</span>
+                            {% else %}
+                                <span class="vacio">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if dias.miercoles %}
+                                <span class="horario-pill">{{ dias.miercoles }}</span>
+                            {% else %}
+                                <span class="vacio">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if dias.jueves %}
+                                <span class="horario-pill">{{ dias.jueves }}</span>
+                            {% else %}
+                                <span class="vacio">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if dias.viernes %}
+                                <span class="horario-pill">{{ dias.viernes }}</span>
+                            {% else %}
+                                <span class="vacio">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="msj">Carga un archivo XML para visualizar tus horarios configurados.</p>
+        {% endif %}
+    </div>
+    <!-- === FIN BLOQUE DE DEBUG === -->
 <script>
-function cargarArchivo(input) {
+function cargarArchivoXML(input) {
     const file = input.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('xmlInput').value = e.target.result;
-        };
-        reader.readAsText(file);
-    }
+    if (!file) return;
+
+    // Mostrar nombre del archivo seleccionado
+    document.getElementById('nombre-archivo').textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('xml-content').value = e.target.result;
+    };
+    reader.readAsText(file);
 }
 </script>
+
+<style>
+/* ==================== ESTILOS MODERNOS ==================== */
+.horarios-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+h1 {
+    color: #1a237e;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.upload-section {
+    margin-bottom: 1.5rem;
+}
+
+.upload-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-cargar {
+    padding: 10px 20px;
+    background: #e8eaf6;
+    color: #1a237e;
+    border: 1px solid #c5cae9;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cargar:hover {
+    background: #c5cae9;
+    transform: translateY(-1px);
+}
+
+.btn-procesar {
+    padding: 10px 24px;
+    background: #1a9e75;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-procesar:hover {
+    background: #157a5a;
+    transform: translateY(-1px);
+}
+
+.archivo-seleccionado {
+    padding: 12px 18px;
+    background: #f0f2fb;
+    border: 1px solid #c5cae9;
+    border-radius: 8px;
+    color: #1a237e;
+    font-weight: 500;
+    margin-top: 12px;
+}
+
+/* XML colapsable */
+.xml-details {
+    margin: 1.5rem 0;
+    background: #fff;
+    border: 1px solid #dde3f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.xml-details summary {
+    padding: 12px 18px;
+    font-weight: 500;
+    cursor: pointer;
+    background: #f8f9ff;
+}
+
+.xml-area {
+    width: 100%;
+    min-height: 160px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.9rem;
+    padding: 1rem;
+    border: none;
+    resize: vertical;
+}
+
+/* Tabla semanal */
+.tabla-contenedor {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #dde3f0;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+thead th {
+    background: #f0f2fb;
+    padding: 14px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #3949ab;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    border-bottom: 2px solid #dde3f0;
+}
+
+thead th:first-child {
+    text-align: left;
+    min-width: 180px;
+}
+
+tbody td {
+    padding: 14px 16px;
+    text-align: center;
+    border-bottom: 1px solid #f0f2fb;
+    vertical-align: middle;
+}
+
+.curso-nombre {
+    text-align: left !important;
+    font-weight: 600;
+    color: #1a237e;
+}
+
+.horario-pill {
+    display: inline-block;
+    background: #e8eaf6;
+    color: #3c3489;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.vacio {
+    color: #aaa;
+    font-size: 1.1rem;
+}
+
+.msj-ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 12px 18px;
+    border-radius: 8px;
+    border: 1px solid #a5d6a7;
+    margin: 1rem 0;
+}
+
+.msj {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #888;
+    font-size: 1rem;
+}
+</style>
+
 {% endblock %}

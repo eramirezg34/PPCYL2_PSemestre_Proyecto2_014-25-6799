@@ -6,32 +6,71 @@
 {% endblock %}
 
 {% block content %}
-<h1>REVISIÓN DE USUARIOS</h1>
+<div class="page-header">
+    <h1>👥 Revisión de Usuarios</h1>
+    <p>Lista de todos los usuarios cargados en el sistema</p>
+</div>
 
 <div class="card">
+    <h3>Usuarios Registrados</h3>
     <table>
         <thead>
             <tr>
-                <th>ID</th>
+                <th>ID / Carnet</th>
                 <th>Nombre</th>
                 <th>Rol</th>
+                <th>Estado</th>
             </tr>
         </thead>
         <tbody>
             {% for usuario in usuarios %}
             <tr>
-                <td>{{ usuario.id }}</td>
+                <td><strong>{{ usuario.id }}</strong></td>
                 <td>{{ usuario.nombre }}</td>
-                <td>{{ usuario.rol }}</td>
+                <td>
+                    {% if usuario.rol == 'tutor' %}
+                        <span style="background:#e3f2fd; color:#1565c0; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">
+                            👨‍🏫 Tutor
+                        </span>
+                    {% else %}
+                        <span style="background:#e8f5e9; color:#2e7d32; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">
+                            👨‍🎓 Estudiante
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span style="background:#e8f5e9; color:#2e7d32; padding:4px 10px; border-radius:20px; font-size:12px;">
+                        ✅ Activo
+                    </span>
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="3" style="text-align:center">
-                    No hay usuarios cargados
+                <td colspan="4" style="text-align:center; padding:30px; color:#999;">
+                    ⚠️ No hay usuarios cargados. Procesa un archivo XML primero.
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div class="card" style="background:#f8f9ff;">
+    <div style="display:flex; gap:20px; text-align:center;">
+        <div style="flex:1; padding:15px; background:white; border-radius:10px; border:1px solid #e8eaf6;">
+            <div style="font-size:2rem; font-weight:700; color:#1a237e;">
+                {{ usuarios|length }}
+            </div>
+            <div style="color:#666; font-size:13px;">Total Usuarios</div>
+        </div>
+        <div style="flex:1; padding:15px; background:white; border-radius:10px; border:1px solid #e8eaf6;">
+            <div style="font-size:2rem; font-weight:700; color:#1565c0;">
+                {% with tutores=0 %}
+                    {{ usuarios|length }}
+                {% endwith %}
+            </div>
+            <div style="color:#666; font-size:13px;">Tutores y Estudiantes</div>
+        </div>
+    </div>
 </div>
 {% endblock %}

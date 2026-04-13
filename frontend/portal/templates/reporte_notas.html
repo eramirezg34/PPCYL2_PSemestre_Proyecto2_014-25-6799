@@ -7,9 +7,216 @@
 {% endblock %}
 
 {% block content %}
-<h1>REPORTE DE NOTAS</h1>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-<div class="card">
-    <p>Carga notas primero desde el menú de Ingresar Notas.</p>
-</div>
+  <style>
+    h1 { font-size: 1.6rem; font-weight: 600; margin-bottom: 0.25rem; color: #1a237e; }
+    .subtitulo { font-size: 0.9rem; color: #555; margin-bottom: 2rem; }
+    .seccion { background: #fff; border-radius: 12px; border: 1px solid #dde3f0; padding: 1.5rem; margin-bottom: 2rem; }
+    .seccion h2 { font-size: 1.1rem; font-weight: 600; color: #1a237e; margin-bottom: 1rem; border-bottom: 2px solid #e8eaf6; padding-bottom: 0.5rem; }
+    .controles { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: flex-end; }
+    .control-grupo { display: flex; flex-direction: column; gap: 4px; }
+    .control-grupo label { font-size: 0.8rem; color: #555; font-weight: 500; }
+    select { padding: 0.45rem 0.85rem; border-radius: 8px; border: 1px solid #c5cae9; background: #f8f9ff; font-size: 0.9rem; color: #1a237e; cursor: pointer; min-width: 180px; }
+    .btn-pdf { padding: 0.45rem 1.2rem; border-radius: 8px; border: 1px solid #1a237e; background: #1a237e; color: #fff; font-size: 0.88rem; font-weight: 500; cursor: pointer; }
+    .btn-pdf:hover { background: #283593; }
+    .grafica-contenedor { position: relative; width: 100%; max-height: 380px; }
+    canvas { width: 100% !important; }
+    #btn-pdf-seccion { margin-top: 1.5rem; display: flex; justify-content: flex-end; }
+  </style>
+
+  <h1>Reporte de Notas</h1>
+  <p class="subtitulo">Universidad Mariano Gálvez — PPCYL2-AcadNet</p>
+
+  <!-- Selector de curso principal -->
+  <div class="seccion">
+    <form method="POST">
+      {% csrf_token %}
+      <div class="controles">
+        <div class="control-grupo">
+          <label>Selecciona un curso:</label>
+          <select name="codigo_curso">
+            {% for codigo, nombre in cursos %}
+              <option value="{{ codigo }}">{{ codigo }} - {{ nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn-pdf">📊 Cargar Datos</button>
+      </div>
+    </form>
+  </div>
+
+  {% if imagen %}
+  <!-- Graphviz -->
+  <div class="seccion">
+    <h2>Matriz Dispersa de Notas</h2>
+    <img src="data:image/png;base64,{{ imagen }}"
+         style="max-width:100%; border:1px solid #ddd; border-radius:4px;">
+  </div>
+
+  <!-- Reporte 1 -->
+  <div class="seccion" id="seccion-reporte1">
+    <h2>Reporte 1 — Promedio de notas por actividad</h2>
+    <div class="grafica-contenedor">
+      <canvas id="graficaR1"></canvas>
+    </div>
+  </div>
+
+  <!-- Reporte 2 -->
+  <div class="seccion" id="seccion-reporte2">
+    <h2>Reporte 2 — TOP de notas por actividad</h2>
+    <div class="controles">
+      <div class="control-grupo">
+        <label for="actividad-r2">Actividad</label>
+        <select id="actividad-r2" onchange="cargarReporte2()">
+          {% for actividad in actividades %}
+            <option value="{{ actividad }}">{{ actividad }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="grafica-contenedor">
+      <canvas id="graficaR2"></canvas>
+    </div>
+  </div>
+
+  <div id="btn-pdf-seccion">
+    <button class="btn-pdf" onclick="exportarPDF()">📄 Exportar todo a PDF</button>
+  </div>
+
+  <script>
+    
+  const notasData = {{ notas_json|safe }};
+
+    // Calcular promedios por actividad
+    const promedios = {};
+    const conteos = {};
+    notasData.forEach(nota => {
+      if (!promedios[nota.fila]) {
+        promedios[nota.fila] = 0;
+        conteos[nota.fila] = 0;
+      }
+      promedios[nota.fila] += nota.valor;
+      conteos[nota.fila]++;
+    });
+
+    const actividades = Object.keys(promedios);
+    const valores = actividades.map(a =>
+      parseFloat((promedios[a] / conteos[a]).toFixed(2))
+    );
+
+    // Grafica 1 - Promedio
+    let chartR1 = null;
+    const ctx1 = document.getElementById('graficaR1').getContext('2d');
+    chartR1 = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: actividades,
+        datasets: [{
+          label: 'Promedio',
+          data: valores,
+          backgroundColor: 'rgba(57, 73, 171, 0.65)',
+          borderColor: 'rgba(26, 35, 126, 0.9)',
+          borderWidth: 1.5,
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { min: 0, max: 100, ticks: { stepSize: 10 } }
+        }
+      }
+    });
+
+    // Grafica 2 - TOP
+    let chartR2 = null;
+
+    function cargarReporte2() {
+      const actividad = document.getElementById('actividad-r2').value;
+      const filtradas = notasData
+        .filter(n => n.fila === actividad)
+        .sort((a, b) => b.valor - a.valor);
+
+      const carnets = filtradas.map(n => n.columna);
+      const vals = filtradas.map(n => n.valor);
+
+      if (chartR2) chartR2.destroy();
+
+      const ctx2 = document.getElementById('graficaR2').getContext('2d');
+      chartR2 = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: carnets,
+          datasets: [{
+            label: 'Nota',
+            data: vals,
+            backgroundColor: vals.map((_, i) =>
+              i === 0 ? 'rgba(251,192,45,0.85)' :
+              i === 1 ? 'rgba(57,73,171,0.75)' :
+              i === 2 ? 'rgba(239,83,80,0.75)' :
+                        'rgba(120,144,156,0.55)'
+            ),
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { min: 0, max: 100 } }
+        }
+      });
+    }
+
+    // Exportar PDF
+    async function exportarPDF() {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'pt', 'a4');
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+
+      pdf.setFontSize(18);
+      pdf.setTextColor(26, 35, 126);
+      pdf.text('Reporte de Notas — PPCYL2-AcadNet', pageW / 2, 40, { align: 'center' });
+
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text('Universidad Mariano Gálvez', pageW / 2, 58, { align: 'center' });
+
+      let y = 80;
+      const secciones = [
+        document.getElementById('seccion-reporte1'),
+        document.getElementById('seccion-reporte2'),
+      ];
+
+      for (const el of secciones) {
+        const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
+        const imgData = canvas.toDataURL('image/png');
+        const imgH = (canvas.height * (pageW - 60)) / canvas.width;
+
+        if (y + imgH > pageH - 40) { pdf.addPage(); y = 40; }
+        pdf.addImage(imgData, 'PNG', 30, y, pageW - 60, imgH);
+        y += imgH + 20;
+      }
+
+      const fecha = new Date().toLocaleDateString('es-GT');
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text(`Generado el ${fecha}`, 30, pageH - 20);
+      pdf.save('reporte_notas.pdf');
+    }
+
+    // Cargar top inicial
+    cargarReporte2();
+  </script>
+  {% endif %}
+
+  {% if error %}
+  <div class="seccion" style="color:red;">{{ error }}</div>
+  {% endif %}
+
 {% endblock %}
