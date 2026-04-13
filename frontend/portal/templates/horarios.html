@@ -1,40 +1,14 @@
-<<<<<<< Updated upstream
 {% extends "base.html" %}
-=======
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AcadNet - Login</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #1565c0 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
->>>>>>> Stashed changes
 
-        .particles {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            overflow: hidden;
-            z-index: 0;
-        }
+{% block sidebar_links %}
+    <a href="/horarios/">📅 Horarios</a>
+    <a href="/notas/">📝 Ingresar Notas</a>
+    <a href="/reporte-notas/">📊 Reporte Notas</a>
+{% endblock %}
 
-<<<<<<< Updated upstream
 {% block content %}
-
 <div class="horarios-container">
     <h1>HORARIOS</h1>
-
-    <!-- Barra superior con botones y nombre de archivo -->
     <div class="upload-section">
         <div class="upload-bar">
             <label class="btn-cargar" for="archivo-xml">
@@ -42,13 +16,10 @@
             </label>
             <input type="file" id="archivo-xml" accept=".xml" style="display: none;" 
                    onchange="cargarArchivoXML(this)">
-
             <button type="submit" form="form-horarios" class="btn-procesar">
                 💾 Procesar y Guardar Horarios
             </button>
         </div>
-
-        <!-- Nombre del archivo (como en la Imagen 2) -->
         <div id="nombre-archivo" class="archivo-seleccionado">
             Ningún archivo seleccionado
         </div>
@@ -56,20 +27,17 @@
 
     <form method="POST" id="form-horarios" enctype="multipart/form-data">
         {% csrf_token %}
-
-        <!-- Área XML → ahora es colapsable (opcional) -->
         <details class="xml-details">
             <summary>📄 Ver / Editar contenido XML (opcional)</summary>
             <textarea id="xml-content" name="xml_content" class="xml-area" 
-                      placeholder="El contenido del XML aparecerá aquí después de cargar el archivo..."></textarea>
+                      placeholder="El contenido del XML aparecerá aquí..."></textarea>
         </details>
     </form>
 
-   {% if mensaje %}
+    {% if mensaje %}
         <div class="msj-ok">{{ mensaje }}</div>
     {% endif %}
 
-    <!-- Tabla semanal -->
     <div class="tabla-contenedor">
         {% if horarios and horarios|length > 0 %}
             <table>
@@ -87,41 +55,11 @@
                     {% for curso, dias in horarios.items %}
                     <tr>
                         <td class="curso-nombre"><strong>{{ curso }}</strong></td>
-                        <td>
-                            {% if dias.lunes %}
-                                <span class="horario-pill">{{ dias.lunes }}</span>
-                            {% else %}
-                                <span class="vacio">—</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if dias.martes %}
-                                <span class="horario-pill">{{ dias.martes }}</span>
-                            {% else %}
-                                <span class="vacio">—</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if dias.miercoles %}
-                                <span class="horario-pill">{{ dias.miercoles }}</span>
-                            {% else %}
-                                <span class="vacio">—</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if dias.jueves %}
-                                <span class="horario-pill">{{ dias.jueves }}</span>
-                            {% else %}
-                                <span class="vacio">—</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if dias.viernes %}
-                                <span class="horario-pill">{{ dias.viernes }}</span>
-                            {% else %}
-                                <span class="vacio">—</span>
-                            {% endif %}
-                        </td>
+                        <td>{% if dias.lunes %}<span class="horario-pill">{{ dias.lunes }}</span>{% else %}<span class="vacio">—</span>{% endif %}</td>
+                        <td>{% if dias.martes %}<span class="horario-pill">{{ dias.martes }}</span>{% else %}<span class="vacio">—</span>{% endif %}</td>
+                        <td>{% if dias.miercoles %}<span class="horario-pill">{{ dias.miercoles }}</span>{% else %}<span class="vacio">—</span>{% endif %}</td>
+                        <td>{% if dias.jueves %}<span class="horario-pill">{{ dias.jueves }}</span>{% else %}<span class="vacio">—</span>{% endif %}</td>
+                        <td>{% if dias.viernes %}<span class="horario-pill">{{ dias.viernes }}</span>{% else %}<span class="vacio">—</span>{% endif %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -130,15 +68,13 @@
             <p class="msj">Carga un archivo XML para visualizar tus horarios configurados.</p>
         {% endif %}
     </div>
-    <!-- === FIN BLOQUE DE DEBUG === -->
+</div>
+
 <script>
 function cargarArchivoXML(input) {
     const file = input.files[0];
     if (!file) return;
-
-    // Mostrar nombre del archivo seleccionado
     document.getElementById('nombre-archivo').textContent = file.name;
-
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('xml-content').value = e.target.result;
@@ -148,529 +84,27 @@ function cargarArchivoXML(input) {
 </script>
 
 <style>
-/* ==================== ESTILOS MODERNOS ==================== */
-.horarios-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-}
-
-h1 {
-    color: #1a237e;
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-}
-
-.upload-section {
-    margin-bottom: 1.5rem;
-}
-
-.upload-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.btn-cargar {
-    padding: 10px 20px;
-    background: #e8eaf6;
-    color: #1a237e;
-    border: 1px solid #c5cae9;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-cargar:hover {
-    background: #c5cae9;
-    transform: translateY(-1px);
-}
-
-.btn-procesar {
-    padding: 10px 24px;
-    background: #1a9e75;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-procesar:hover {
-    background: #157a5a;
-    transform: translateY(-1px);
-}
-
-.archivo-seleccionado {
-    padding: 12px 18px;
-    background: #f0f2fb;
-    border: 1px solid #c5cae9;
-    border-radius: 8px;
-    color: #1a237e;
-    font-weight: 500;
-    margin-top: 12px;
-}
-
-/* XML colapsable */
-.xml-details {
-    margin: 1.5rem 0;
-    background: #fff;
-    border: 1px solid #dde3f0;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.xml-details summary {
-    padding: 12px 18px;
-    font-weight: 500;
-    cursor: pointer;
-    background: #f8f9ff;
-}
-
-.xml-area {
-    width: 100%;
-    min-height: 160px;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 0.9rem;
-    padding: 1rem;
-    border: none;
-    resize: vertical;
-}
-
-/* Tabla semanal */
-.tabla-contenedor {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #dde3f0;
-    overflow-x: auto;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 800px;
-}
-
-thead th {
-    background: #f0f2fb;
-    padding: 14px 16px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #3949ab;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-align: center;
-    border-bottom: 2px solid #dde3f0;
-}
-
-thead th:first-child {
-    text-align: left;
-    min-width: 180px;
-}
-
-tbody td {
-    padding: 14px 16px;
-    text-align: center;
-    border-bottom: 1px solid #f0f2fb;
-    vertical-align: middle;
-}
-
-.curso-nombre {
-    text-align: left !important;
-    font-weight: 600;
-    color: #1a237e;
-}
-
-.horario-pill {
-    display: inline-block;
-    background: #e8eaf6;
-    color: #3c3489;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.vacio {
-    color: #aaa;
-    font-size: 1.1rem;
-}
-
-.msj-ok {
-    background: #e8f5e9;
-    color: #2e7d32;
-    padding: 12px 18px;
-    border-radius: 8px;
-    border: 1px solid #a5d6a7;
-    margin: 1rem 0;
-}
-
-.msj {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: #888;
-    font-size: 1rem;
-}
+.horarios-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+h1 { color: #1a237e; font-size: 1.8rem; font-weight: 600; margin-bottom: 1.5rem; }
+.upload-section { margin-bottom: 1.5rem; }
+.upload-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn-cargar { padding: 10px 20px; background: #e8eaf6; color: #1a237e; border: 1px solid #c5cae9; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.btn-cargar:hover { background: #c5cae9; }
+.btn-procesar { padding: 10px 24px; background: #1a9e75; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; }
+.btn-procesar:hover { background: #157a5a; }
+.archivo-seleccionado { padding: 12px 18px; background: #f0f2fb; border: 1px solid #c5cae9; border-radius: 8px; color: #1a237e; font-weight: 500; margin-top: 12px; }
+.xml-details { margin: 1.5rem 0; background: #fff; border: 1px solid #dde3f0; border-radius: 10px; overflow: hidden; }
+.xml-details summary { padding: 12px 18px; font-weight: 500; cursor: pointer; background: #f8f9ff; }
+.xml-area { width: 100%; min-height: 160px; font-family: monospace; font-size: 0.9rem; padding: 1rem; border: none; resize: vertical; }
+.tabla-contenedor { background: white; border-radius: 12px; border: 1px solid #dde3f0; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 800px; }
+thead th { background: #f0f2fb; padding: 14px 16px; font-size: 0.82rem; font-weight: 600; color: #3949ab; text-transform: uppercase; text-align: center; border-bottom: 2px solid #dde3f0; }
+thead th:first-child { text-align: left; min-width: 180px; }
+tbody td { padding: 14px 16px; text-align: center; border-bottom: 1px solid #f0f2fb; }
+.curso-nombre { text-align: left !important; font-weight: 600; color: #1a237e; }
+.horario-pill { display: inline-block; background: #e8eaf6; color: #3c3489; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
+.vacio { color: #aaa; }
+.msj-ok { background: #e8f5e9; color: #2e7d32; padding: 12px 18px; border-radius: 8px; border: 1px solid #a5d6a7; margin: 1rem 0; }
+.msj { text-align: center; padding: 3rem 1rem; color: #888; }
 </style>
-
 {% endblock %}
-=======
-        .particle {
-            position: absolute;
-            width: 6px; height: 6px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 50%;
-            animation: float linear infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
-        }
-
-        .login-container {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            width: 880px;
-            background: white;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
-        }
-
-        .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, #1a237e, #1565c0);
-            padding: 50px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-left::before {
-            content: '';
-            position: absolute;
-            width: 300px; height: 300px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
-            top: -100px; right: -100px;
-        }
-
-        .login-left::after {
-            content: '';
-            position: absolute;
-            width: 200px; height: 200px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
-            bottom: -50px; left: -50px;
-        }
-
-        .login-left .logo {
-            font-size: 46px;
-            font-weight: 800;
-            color: white;
-            margin-bottom: 10px;
-            letter-spacing: 3px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .login-left .logo span { color: #90caf9; }
-
-        .login-left .tagline {
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
-            line-height: 1.8;
-            margin-top: 15px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .login-left .icon {
-            font-size: 90px;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .features {
-            margin-top: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: rgba(255,255,255,0.85);
-            font-size: 13px;
-            margin: 8px 0;
-            text-align: left;
-        }
-
-        .feature-item span {
-            font-size: 16px;
-        }
-
-        .login-right {
-            flex: 1;
-            padding: 50px 45px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .login-right h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1a237e;
-            margin-bottom: 5px;
-        }
-
-        .login-right .welcome-sub {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 35px;
-        }
-
-        .form-group {
-            margin-bottom: 22px;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #444;
-            margin-bottom: 8px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 13px 16px 13px 42px;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: all 0.3s;
-            background: #fafafa;
-            color: #333;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #1a237e;
-            box-shadow: 0 0 0 4px rgba(26,35,126,0.08);
-            background: white;
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #1a237e, #1565c0);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(26,35,126,0.35);
-        }
-
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
-        .error-msg {
-            background: #ffebee;
-            color: #c62828;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border-left: 4px solid #c62828;
-            font-size: 13px;
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            animation: shake 0.3s ease;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 25px 0;
-            color: #ccc;
-            font-size: 12px;
-        }
-
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #eee;
-        }
-
-        .roles-info {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-        }
-
-        .role-badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .role-admin { background: #e8eaf6; color: #1a237e; }
-        .role-tutor { background: #e3f2fd; color: #1565c0; }
-        .role-student { background: #e8f5e9; color: #2e7d32; }
-
-        .universidad {
-            color: #bbb;
-            font-size: 11px;
-            text-align: center;
-            margin-top: 25px;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Partículas de fondo -->
-    <div class="particles" id="particles"></div>
-
-    <div class="login-container">
-        <div class="login-left">
-            <div class="icon">🎓</div>
-            <div class="logo">Acad<span>Net</span></div>
-            <div class="tagline">
-                Plataforma educativa que conecta<br>
-                estudiantes con tutores especializados
-            </div>
-            <div class="features">
-                <div class="feature-item">
-                    <span>📊</span> Reportes y estadísticas en tiempo real
-                </div>
-                <div class="feature-item">
-                    <span>📅</span> Gestión de horarios de tutoría
-                </div>
-                <div class="feature-item">
-                    <span>📝</span> Seguimiento personalizado de notas
-                </div>
-                <div class="feature-item">
-                    <span>📄</span> Exportación de reportes a PDF
-                </div>
-            </div>
-        </div>
-
-        <div class="login-right">
-            <h2>Bienvenido 👋</h2>
-            <p class="welcome-sub">Ingresa tus credenciales para acceder al sistema</p>
-
-            <form method="POST">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label>Usuario</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">👤</span>
-                        <input type="text" name="usuario" 
-                            placeholder="Ingresa tu usuario" required
-                            autocomplete="username">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Contraseña</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">🔒</span>
-                        <input type="password" name="contrasenia" 
-                            placeholder="Ingresa tu contraseña" required
-                            autocomplete="current-password">
-                    </div>
-                </div>
-                <button type="submit" class="btn-login">
-                    Iniciar Sesión →
-                </button>
-            </form>
-
-            {% if error %}
-            <div class="error-msg">⚠️ {{ error }}</div>
-            {% endif %}
-
-            <div class="divider">Roles disponibles</div>
-            <div class="roles-info">
-                <span class="role-badge role-admin">👨‍💼 Admin</span>
-                <span class="role-badge role-tutor">👨‍🏫 Tutor</span>
-                <span class="role-badge role-student">👨‍🎓 Estudiante</span>
-            </div>
-
-            <div class="universidad">
-                Universidad Mariano Gálvez de Guatemala<br>
-                PPCYL2-AcadNet © 2026
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Generar partículas
-        const container = document.getElementById('particles');
-        for (let i = 0; i < 20; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = Math.random() * 100 + '%';
-            p.style.animationDuration = (Math.random() * 10 + 8) + 's';
-            p.style.animationDelay = (Math.random() * 10) + 's';
-            p.style.width = p.style.height = (Math.random() * 8 + 4) + 'px';
-            container.appendChild(p);
-        }
-    </script>
-</body>
-</html>
->>>>>>> Stashed changes
