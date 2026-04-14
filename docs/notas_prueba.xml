@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<datos>
+<curso codigo="770">Matematicas</curso>
+<notas>
+    <actividad nombre="Tarea1" carnet="1234">90</actividad>
+    <actividad nombre="Tarea1" carnet="5678">70</actividad>
+    <actividad nombre="Tarea2" carnet="1234">80</actividad>
+    <actividad nombre="Tarea2" carnet="5678">60</actividad>
+    <actividad nombre="Tarea3" carnet="1234">100</actividad>
+    <actividad nombre="Tarea3" carnet="5678">50</actividad>
+</notas>
+</datos>

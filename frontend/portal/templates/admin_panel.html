@@ -6,33 +6,41 @@
 {% endblock %}
 
 {% block content %}
-<h1>CARGA DE ARCHIVOS</h1>
+<div class="page-header">
+    <h1>📁 Carga de Archivos</h1>
+    <p>Procesa el archivo XML de configuración del sistema</p>
+</div>
 
 <div class="card">
+    <h3>Archivo de Entrada</h3>
     <form method="POST">
         {% csrf_token %}
-        <button type="button" class="btn btn-primary"
-            onclick="document.getElementById('fileInput').click()">
-            📂 Cargar Archivo
-        </button>
-        <button type="submit" class="btn btn-success">⚙️ Procesar Datos</button>
-        <button type="button" class="btn btn-danger"
-            onclick="document.getElementById('xmlInput').value=''">
-            🗑️ Limpiar Datos
-        </button>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button type="button" class="btn btn-secondary"
+                onclick="document.getElementById('fileInput').click()">
+                📂 Seleccionar Archivo
+            </button>
+            <button type="submit" class="btn btn-primary">
+                ⚙️ Procesar Datos
+            </button>
+            <button type="button" class="btn btn-danger"
+                onclick="document.getElementById('xmlInput').value=''">
+                🗑️ Limpiar
+            </button>
+        </div>
         <input type="file" id="fileInput" accept=".xml" style="display:none"
             onchange="cargarArchivo(this)">
+        <span id="nombreArchivo" style="color:#666; font-size:13px;"></span>
         <br><br>
-        <label>Entrada:</label>
-        <textarea id="xmlInput" name="xml_content" rows="10"
-            placeholder="<?xml version='1.0'?>"></textarea>
+        <textarea id="xmlInput" name="xml_content" rows="12"
+            placeholder="<?xml version='1.0' encoding='UTF-8'?>&#10;<!-- El contenido XML aparecerá aquí -->"></textarea>
     </form>
 </div>
 
 {% if salida %}
 <div class="card">
-    <label>SALIDA:</label>
-    <textarea rows="10" readonly>{{ salida }}</textarea>
+    <h3>✅ Resultado del Procesamiento</h3>
+    <textarea rows="12" readonly style="background:#f8fff8; border-color:#2e7d32;">{{ salida }}</textarea>
 </div>
 {% endif %}
 
@@ -40,6 +48,7 @@
 function cargarArchivo(input) {
     const file = input.files[0];
     if (file) {
+        document.getElementById('nombreArchivo').textContent = '📄 ' + file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('xmlInput').value = e.target.result;

@@ -1,18 +1,21 @@
 from flask import Flask, request, jsonify
 import sys
 import os
+import xml.etree.ElementTree as ET
+from collections import defaultdict
 
 # Agregar backend al path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from services.xml_service import (
     procesar_xml_configuracion,
-    procesar_horarios,
     procesar_notas,
     obtener_db
 )
 
 app = Flask(__name__)
+
+# Almacenamiento temporal de horarios por tutor (mientras no uses base de datos persistente)
+horarios_por_tutor = defaultdict(dict)
 
 # ── LOGIN ──────────────────────────────────────────
 @app.route('/login', methods=['POST'])
@@ -21,22 +24,17 @@ def login():
     usuario = data.get('usuario')
     contrasenia = data.get('contrasenia')
     db = obtener_db()
-
     if usuario == 'AdminPPCYL2' and contrasenia == 'AdminPPCYL2771':
         return jsonify({'rol': 'admin', 'nombre': 'Administrador'}), 200
-
     if usuario in db['tutores']:
         t = db['tutores'][usuario]
         if t.contrasenia == contrasenia:
             return jsonify({'rol': 'tutor', 'nombre': t.nombre, 'id': usuario}), 200
-
     if usuario in db['estudiantes']:
         e = db['estudiantes'][usuario]
         if e.contrasenia == contrasenia:
             return jsonify({'rol': 'estudiante', 'nombre': e.nombre, 'id': usuario}), 200
-
     return jsonify({'error': 'Credenciales incorrectas'}), 401
-
 
 # ── ADMIN ──────────────────────────────────────────
 @app.route('/cargar-configuracion', methods=['POST'])
@@ -55,25 +53,75 @@ def ver_usuarios():
         usuarios.append({'id': id, 'nombre': e.nombre, 'rol': 'estudiante'})
     return jsonify(usuarios), 200
 
+# ── TUTOR - HORARIOS (CORREGIDO) ─────────────────────
+@app.route('/horarios/<tutor_id>', methods=['POST', 'GET'])
+def manejar_horarios(tutor_id):
+    if request.method == 'POST':
+        try:
+            xml_string = request.data.decode('utf-8')
+            if not xml_string:
+                return jsonify({"error": "No se recibió XML"}), 400
 
-# ── TUTOR ──────────────────────────────────────────
-@app.route('/horarios/<tutor_id>', methods=['POST'])
-def cargar_horarios(tutor_id):
-    xml_string = request.data.decode('utf-8')
-    procesar_horarios(xml_string, tutor_id)
-    return jsonify({'mensaje': 'Horarios cargados correctamente'}), 200
+            root = ET.fromstring(xml_string)
+            tutor_horarios = {}
 
-@app.route('/horarios/<tutor_id>', methods=['GET'])
-def ver_horarios(tutor_id):
-    db = obtener_db()
-    if tutor_id not in db['tutores']:
-        return jsonify({'error': 'Tutor no encontrado'}), 404
-    tutor = db['tutores'][tutor_id]
-    return jsonify({
-        'cursos': tutor.cursos,
-        'horarios': tutor.horarios
-    }), 200
+            for curso_elem in root.findall('curso'):
+                codigo = curso_elem.get('codigo')
+                if not codigo:
+                    continue
 
+                # Obtener día
+                dia_elem = curso_elem.find('dia')
+                dia = dia_elem.text.strip().upper() if dia_elem is not None and dia_elem.text else None
+
+                # Obtener todo el texto dentro del <curso>
+                texto_completo = ''.join(curso_elem.itertext()).strip()
+
+                # Extraer HorarioI y HorarioF
+                if 'HorarioI:' in texto_completo and 'HorarioF:' in texto_completo:
+                    try:
+                        # Extraer hora inicio
+                        parte_inicio = texto_completo.split('HorarioI:')[1]
+                        inicio = parte_inicio.split('HorarioF:')[0].strip()
+                        
+                        # Extraer hora fin
+                        fin = texto_completo.split('HorarioF:')[1].strip()
+
+                        if dia and inicio and fin:
+                            if codigo not in tutor_horarios:
+                                tutor_horarios[codigo] = {}
+                            tutor_horarios[codigo][dia] = f"{inicio} - {fin}"
+                    except:
+                        continue
+
+            # Guardar en memoria
+            horarios_por_tutor[tutor_id] = tutor_horarios
+
+            return jsonify({'mensaje': 'Horarios cargados correctamente'}), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    # GET: Devolver horarios al Django
+    elif request.method == 'GET':
+        tutor_data = horarios_por_tutor.get(tutor_id, {})
+
+        horarios_formateados = {}
+        for codigo, dias_dict in tutor_data.items():
+            horarios_formateados[codigo] = {
+                'LUNES':     dias_dict.get('LUNES', ''),
+                'MARTES':    dias_dict.get('MARTES', ''),
+                'MIERCOLES': dias_dict.get('MIERCOLES', ''),
+                'JUEVES':    dias_dict.get('JUEVES', ''),
+                'VIERNES':   dias_dict.get('VIERNES', '')
+            }
+
+        return jsonify({
+            'cursos': list(tutor_data.keys()),
+            'horarios': horarios_formateados
+        }), 200
+
+# ── NOTAS ──────────────────────────────────────────
 @app.route('/notas/<tutor_id>', methods=['POST'])
 def cargar_notas(tutor_id):
     xml_string = request.data.decode('utf-8')
@@ -92,7 +140,6 @@ def ver_notas_curso(codigo):
         return jsonify({'notas': []}), 200
     return jsonify({'notas': curso.matriz_notas.obtener_todos()}), 200
 
-
 # ── ESTUDIANTE ─────────────────────────────────────
 @app.route('/mis-notas/<carnet>', methods=['GET'])
 def mis_notas(carnet):
@@ -108,6 +155,60 @@ def mis_notas(carnet):
                 notas = curso.matriz_notas.obtener_todos()
                 resultado[codigo] = notas
     return jsonify(resultado), 200
+
+# ── GRAPHVIZ ───────────────────────────────────────
+@app.route('/reporte-graphviz/<codigo>', methods=['GET'])
+def reporte_graphviz(codigo):
+    db = obtener_db()
+    if codigo not in db['cursos']:
+        return jsonify({'error': 'Curso no encontrado'}), 404
+   
+    curso = db['cursos'][codigo]
+    if not curso.matriz_notas:
+        return jsonify({'error': 'No hay notas cargadas'}), 404
+    matriz = curso.matriz_notas
+   
+    dot_code = 'digraph {\n'
+    dot_code += ' rankdir=LR\n'
+    dot_code += ' node [shape=box style=filled]\n'
+    dot_code += ' "RESUMEN NOTAS" [fillcolor=lightyellow]\n'
+   
+    for idx, carnet in matriz.nombres_columnas.items():
+        dot_code += f' "{carnet}" [fillcolor=lightblue]\n'
+        dot_code += f' "RESUMEN NOTAS" -> "{carnet}"\n'
+   
+    for idx_fila, actividad in matriz.nombres_filas.items():
+        dot_code += f' "{actividad}" [fillcolor=orange]\n'
+        for idx_col, carnet in matriz.nombres_columnas.items():
+            valor = matriz.obtener(idx_fila, idx_col)
+            if valor is not None:
+                dot_code += f' "{actividad}" -> "{carnet}" [label="{valor}"]\n'
+   
+    dot_code += '}'
+
+    try:
+        import subprocess
+        import base64
+        import tempfile
+        import os
+
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
+            tmp_path = tmp.name
+       
+        process = subprocess.run(
+            ['dot', '-Tpng', '-o', tmp_path],
+            input=dot_code.encode(),
+            capture_output=True
+        )
+       
+        with open(tmp_path, 'rb') as f:
+            img_data = base64.b64encode(f.read()).decode()
+       
+        os.unlink(tmp_path)
+        return jsonify({'imagen': img_data}), 200
+   
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

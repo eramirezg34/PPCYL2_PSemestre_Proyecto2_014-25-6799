@@ -9,26 +9,32 @@ class Nodo:
 
 class MatrizDispersa:
     def __init__(self):
-        self.nodos = {}  # (fila, columna) -> Nodo
+        self.filas = {}      # fila -> primer nodo
+        self.columnas = {}   # columna -> primer nodo
         self.nombres_filas = {}    # indice -> nombre actividad
         self.nombres_columnas = {} # indice -> carnet alumno
 
     def insertar(self, fila, columna, valor):
+        # Ignorar notas fuera de rango
         if valor < 0 or valor > 100:
             return
         nodo = Nodo(fila, columna, valor)
-        self.nodos[(fila, columna)] = nodo
+        self.filas[fila] = nodo
+        self.columnas[columna] = nodo
 
     def obtener(self, fila, columna):
-        nodo = self.nodos.get((fila, columna))
-        return nodo.valor if nodo else None
+        if fila in self.filas:
+            nodo = self.filas[fila]
+            if nodo.columna == columna:
+                return nodo.valor
+        return None
 
     def obtener_todos(self):
         resultado = []
-        for (fila, columna), nodo in self.nodos.items():
+        for fila, nodo in self.filas.items():
             resultado.append({
-                'fila': self.nombres_filas.get(fila, str(fila)),
-                'columna': self.nombres_columnas.get(columna, str(columna)),
+                'fila': fila,
+                'columna': nodo.columna,
                 'valor': nodo.valor
             })
         return resultado
