@@ -6,25 +6,6 @@
 
 {% block content %}
 <div class="page-header">
-<<<<<<< HEAD
-    <h1>📋 Mis Calificaciones</h1>
-    <p>Revisa el estado de tus notas por curso</p>
-</div>
-
-{% if notas %}
-    {% for codigo, lista in notas.items %}
-    <div class="card">
-        <h3>📚 Curso: {{ codigo }}</h3>
-
-        <!-- Barra de progreso visual -->
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <div style="flex:1; padding:12px; background:#e8f5e9; border-radius:8px; text-align:center;">
-                <div style="font-size:1.5rem; font-weight:700; color:#2e7d32;">{{ lista|length }}</div>
-                <div style="font-size:12px; color:#555;">Actividades</div>
-            </div>
-        </div>
-
-=======
     <h1>📋 Mis Notas</h1>
     <p>Consulta las notas de tus cursos asignados</p>
 </div>
@@ -33,17 +14,12 @@
     {% for codigo, lista in notas.items %}
     <div class="card">
         <h3>📚 Curso: {{ codigo }}</h3>
->>>>>>> 91523eed6d8c4a834973374765df9eb34907f4dd
         <table>
             <thead>
                 <tr>
                     <th>Actividad</th>
                     <th>Nota</th>
                     <th>Estado</th>
-<<<<<<< HEAD
-                    <th>Indicador</th>
-=======
->>>>>>> 91523eed6d8c4a834973374765df9eb34907f4dd
                 </tr>
             </thead>
             <tbody>
@@ -69,20 +45,10 @@
                             </span>
                         {% endif %}
                     </td>
-<<<<<<< HEAD
-                    <td>
-                        <div style="background:#eee; border-radius:10px; height:8px; width:100px;">
-                            <div style="background:{% if nota.valor >= 80 %}#2e7d32{% elif nota.valor >= 61 %}#f57f17{% else %}#c62828{% endif %}; width:{{ nota.valor }}px; height:8px; border-radius:10px; max-width:100px;"></div>
-                        </div>
-                    </td>
-=======
->>>>>>> 91523eed6d8c4a834973374765df9eb34907f4dd
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-<<<<<<< HEAD
-=======
 
         <!-- Promedio del curso -->
         <div style="margin-top:15px; padding:15px; background:#f8f9ff; border-radius:8px; display:flex; align-items:center; gap:15px;">
@@ -93,7 +59,6 @@
             </div>
             {% endwith %}
         </div>
->>>>>>> 91523eed6d8c4a834973374765df9eb34907f4dd
     </div>
     {% endfor %}
 {% else %}
@@ -105,8 +70,4 @@
         </p>
     </div>
 {% endif %}
-<<<<<<< HEAD
 {% endblock %}
-=======
-{% endblock %}
->>>>>>> 91523eed6d8c4a834973374765df9eb34907f4dd

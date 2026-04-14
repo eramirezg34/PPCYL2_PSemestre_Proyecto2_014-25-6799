@@ -1,4 +1,4 @@
-# PPCYL2-AcadNet 🎓
+# PPCYL2-AcadNet 
 
 **Universidad Mariano Gálvez de Guatemala**  
 **Facultad de Ingeniería Matemática y Ciencias Físicas**  
@@ -7,13 +7,13 @@
 
 ---
 
-## 📋 Descripción
+## Descripción
 
 PPCYL2-AcadNet es una plataforma educativa web que conecta estudiantes con tutores especializados. Permite el seguimiento personalizado del aprendizaje, gestión de sesiones de tutoría y generación de estadísticas académicas.
 
 ---
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 El sistema utiliza arquitectura cliente-servidor con dos servicios:
 
@@ -26,7 +26,7 @@ El sistema utiliza arquitectura cliente-servidor con dos servicios:
 
 ---
 
-## 🚀 Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 - **Python 3.14**
 - **Flask 3.1.3** - Backend API REST
@@ -37,7 +37,7 @@ El sistema utiliza arquitectura cliente-servidor con dos servicios:
 
 ---
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 PPCYL2_PSemestre_Proyecto2_014-25-6799/
@@ -60,7 +60,7 @@ PPCYL2_PSemestre_Proyecto2_014-25-6799/
 
 ---
 
-## ⚙️ Instalación
+## Instalación
 
 ### Requisitos
 - Python 3.14
@@ -100,7 +100,7 @@ http://127.0.0.1:8000
 
 ---
 
-## 👤 Credenciales de Prueba
+## Credenciales de Prueba
 
 | Rol | Usuario | Contraseña |
 |-----|---------|------------|
@@ -108,11 +108,11 @@ http://127.0.0.1:8000
 | Tutor | 1111 | 1234 |
 | Estudiante | 1234 | 1234 |
 
-> ⚠️ Los tutores y estudiantes se cargan mediante el XML de configuración.
+> Los tutores y estudiantes se cargan mediante el XML de configuración.
 
 ---
 
-## 🔌 Endpoints de la API Flask
+## Endpoints de la API Flask
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
@@ -128,7 +128,7 @@ http://127.0.0.1:8000
 
 ---
 
-## 📊 Funcionalidades
+##  Funcionalidades
 
 ### Módulo Administrador
 - Carga de archivo XML de configuración
@@ -148,7 +148,7 @@ http://127.0.0.1:8000
 
 ---
 
-## 🧩 Estructura de Datos
+##  Estructura de Datos
 
 ### Matriz Dispersa (POO)
 La matriz dispersa almacena las notas de forma eficiente:
@@ -158,7 +158,7 @@ La matriz dispersa almacena las notas de forma eficiente:
 
 ---
 
-## 📄 Formato XML de Entrada
+##  Formato XML de Entrada
 
 ```xml
 <?xml version="1.0"?>
@@ -185,7 +185,7 @@ La matriz dispersa almacena las notas de forma eficiente:
 
 ---
 
-## 📄 Formato XML de Salida
+##  Formato XML de Salida
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -209,7 +209,7 @@ La matriz dispersa almacena las notas de forma eficiente:
 
 ---
 
-## 👥 Integrantes
+##  Integrantes
 
 | Nombre | Carnet | Rol |
 |--------|--------|-----|
@@ -219,14 +219,14 @@ La matriz dispersa almacena las notas de forma eficiente:
 
 ---
 
-## 📅 Entregas
+##  Entregas
 
 - **Release 1:** Login, Admin, Tutor básico
 - **Release 2:** Sistema completo con gráficas y reportes
 
 ---
 
-## 📝 Notas Importantes
+##  Notas Importantes
 
 - Los datos se guardan en memoria, se pierden al reiniciar Flask
 - Siempre cargar el XML de configuración como Admin antes de probar
