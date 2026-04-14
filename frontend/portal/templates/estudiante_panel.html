@@ -5,32 +5,74 @@
 {% endblock %}
 
 {% block content %}
-<h1>MIS NOTAS</h1>
+<div class="page-header">
+    <h1>📋 Mis Calificaciones</h1>
+    <p>Revisa el estado de tus notas por curso</p>
+</div>
 
-<div class="card">
-    {% if notas %}
-        {% for codigo, lista in notas.items %}
-        <h3>Curso: {{ codigo }}</h3>
+{% if notas %}
+    {% for codigo, lista in notas.items %}
+    <div class="card">
+        <h3>📚 Curso: {{ codigo }}</h3>
+
+        <!-- Barra de progreso visual -->
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <div style="flex:1; padding:12px; background:#e8f5e9; border-radius:8px; text-align:center;">
+                <div style="font-size:1.5rem; font-weight:700; color:#2e7d32;">{{ lista|length }}</div>
+                <div style="font-size:12px; color:#555;">Actividades</div>
+            </div>
+        </div>
+
         <table>
             <thead>
                 <tr>
                     <th>Actividad</th>
                     <th>Nota</th>
+                    <th>Estado</th>
+                    <th>Indicador</th>
                 </tr>
             </thead>
             <tbody>
                 {% for nota in lista %}
                 <tr>
-                    <td>{{ nota.fila }}</td>
-                    <td>{{ nota.valor }}</td>
+                    <td><strong>{{ nota.fila }}</strong></td>
+                    <td>
+                        <strong style="font-size:16px;">{{ nota.valor }}</strong>
+                        <span style="color:#999; font-size:12px;">/100</span>
+                    </td>
+                    <td>
+                        {% if nota.valor >= 80 %}
+                            <span style="background:#e8f5e9; color:#2e7d32; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;">
+                                ✅ Aprobado
+                            </span>
+                        {% elif nota.valor >= 61 %}
+                            <span style="background:#fff8e1; color:#f57f17; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;">
+                                ⚠️ Regular
+                            </span>
+                        {% else %}
+                            <span style="background:#ffebee; color:#c62828; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;">
+                                ❌ Reprobado
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="background:#eee; border-radius:10px; height:8px; width:100px;">
+                            <div style="background:{% if nota.valor >= 80 %}#2e7d32{% elif nota.valor >= 61 %}#f57f17{% else %}#c62828{% endif %}; width:{{ nota.valor }}px; height:8px; border-radius:10px; max-width:100px;"></div>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <br>
-        {% endfor %}
-    {% else %}
-        <p>No hay notas disponibles aún.</p>
-    {% endif %}
-</div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card" style="text-align:center; padding:50px;">
+        <div style="font-size:60px; margin-bottom:15px;">📭</div>
+        <h3 style="color:#999; font-weight:400;">No hay notas disponibles aún</h3>
+        <p style="color:#bbb; margin-top:8px; font-size:14px;">
+            Tu tutor aún no ha cargado calificaciones para tus cursos
+        </p>
+    </div>
+{% endif %}
 {% endblock %}
