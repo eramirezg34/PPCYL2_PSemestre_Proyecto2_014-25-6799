@@ -100,22 +100,16 @@ def horarios(request):
             except Exception as e:
                 mensaje = f'❌ Error conectando con Flask: {str(e)}'
 
-    # Obtener los horarios del tutor
     try:
         response = requests.get(f'{FLASK_URL}/horarios/{tutor_id}')
         if response.status_code == 200:
             data = response.json()
-
-            # Nueva lógica adaptada al JSON actual del Flask
             cursos = data.get('cursos', [])
-            horarios_dict = data.get('horarios', {})   # diccionario vacío por ahora
+            horarios_dict = data.get('horarios', {})
 
             for codigo in cursos:
-                nombre_curso = f"{codigo} - Curso {codigo}"   # Temporal, hasta que Flask devuelva nombre
-
-                # Si Flask ya devuelve horarios por curso, úsalos. Si no, queda vacío
+                nombre_curso = f"{codigo} - Curso {codigo}"
                 curso_horarios = horarios_dict.get(codigo, {}) if isinstance(horarios_dict, dict) else {}
-
                 horarios_tabla[nombre_curso] = {
                     'lunes':     curso_horarios.get('LUNES', ''),
                     'martes':    curso_horarios.get('MARTES', ''),
@@ -136,6 +130,7 @@ def horarios(request):
         'horarios': horarios_tabla,
         'xml_cargado': request.session.get('xml_horarios', '')
     })
+
 
 def notas(request):
     if request.session.get('rol') != 'tutor':
@@ -170,10 +165,8 @@ def reporte_notas(request):
         tutor_response = requests.get(f'{FLASK_URL}/horarios/{tutor_id}')
         if tutor_response.status_code == 200:
             data = tutor_response.json()
-            for curso in data.get('cursos', []):
-                codigo = curso['codigo']
-                nombre = curso['nombre']
-                cursos.append((codigo, f"{codigo} - {nombre}"))
+            for codigo in data.get('cursos', []):
+                cursos.append((codigo, f"{codigo}"))
     except:
         error = 'Error conectando con el servidor'
 
